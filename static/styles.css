@@ -1,0 +1,14 @@
+.img-thumbnail{
+    height:300px !important;
+}
+
+.container {
+    padding: 80px 0 80px 0 !important;
+}
+
+.fixed-top {
+    background-color: #313a46;
+    box-shadow: 1px 3px 5px #4e4d4d;
+    height:60px;
+    padding-top:10px;
+}

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Costa Rica Weather & Traffic Conditions</title>
+    <link rel="icon" type="shortcut icon" href="{{ url_for('static', filename='costa-rica.png') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous"/>
+  </head>
+  <body data-bs-spy="scroll" data-bs-target="#container_nav" id="container_nav" tabindex="0">
+
+    <div class="fixed-top">
+      <nav class="navbar navbar-expand-lg bg-light">
+        <div class="container-fluid">
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTogglerDemo01" aria-controls="navbarTogglerDemo01" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarTogglerDemo01">
+            <ul class="navbar-nav nav-pills me-auto mb-2 mb-lg-0">
+              <li class="nav-item">
+                <a class="nav-link" href="#weather_conditions">Current Weather Conditions</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#conditions_images">Satallite Weather Conditions Images</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#traffic_conditions">Traffic Conditions</a>
+              </li>
+            </ul>
+          </div>
+          <p class="text-right" id="clock">-- --</p>
+        </div>
+      </nav>
+    </div>
+
+    <div class="container" id="weather_conditions">
+      <div class="row align-self-center">
+        <h3 class="text-center display-3">Current Weather Conditions</h3>
+        <div class="col table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <th>Province</th>
+              <th>Weather Condition</th>
+              <th>Temperature</th>
+              <th>Min Temperature</th>
+              <th>Max Temperature</th>
+              <th>Thermal Sensation</th>
+              <th>Pressure</th>
+              <th>Humidity</th>
+            </thead>
+            <tbody>
+              {% for condition in conditions %}
+                <tr>
+                  <td>{{ condition.location }}</td>
+                  <td>{{ condition.condition["description"] }}</td>
+                  <td>{{ condition.temp }} C</td>
+                  <td>{{ condition.temp_min }} C</td>
+                  <td>{{ condition.temp_max }} C</td>
+                  <td>{{ condition.feels_like }} C</td>
+                  <td>{{ condition.pressure }} mb</td>
+                  <td>{{ condition.humidity }} %</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          <figcaption>
+            Source: <a href="https://openweathermap.org/api">Open Weather API</a>
+          </figcaption>
+        </div>
+      </div>
+    </div>
+
+    <div class="container" id="conditions_images">
+      <h3 class="text-center display-3">Satallite Weather Conditions Images</h3>
+      <div class="row">
+        <div class="col-md">
+          <h6 class="text-center">Costa Rica Map</h6>
+          <img src="https://www.imn.ac.cr/imagenes-sat/vis-animada.gif" class="img-thumbnail img-responsive float-md-start" alt="image 1">
+        </div>
+        <div class="col-md">
+          <h6 class="text-center">Costa Rica & Caribbean</h6>
+          <img src="https://www.imn.ac.cr/imagenes-sat/caribe-animada.gif" class="img-thumbnail img-responsive float-md-none" alt="image 2">
+        </div>
+        <div class="col-md">
+          <h6 class="text-center">Atlantic Infrared</h6>
+          <img src="https://www.imn.ac.cr/imagenes-sat/atlanticoIR-animada.gif" class="img-thumbnail img-responsive float-md-end" alt="image 3">
+        </div>
+      </div>
+      <figcaption>
+        Source: <a href="https://www.imn.ac.cr/en/inicio">Instituto Metereológico Nacional de Costa Rica</a>
+      </figcaption>
+    </div>
+
+    <div class="container" id="traffic_conditions">
+      <h3 class="text-center display-3">Traffic Conditions</h3>
+      <div class="row text-center">
+        <iframe src="https://embed.waze.com/iframe?zoom=10&lat=9.972232&lon=-84.141541&ct=livemap" width="600" height="450" allowfullscreen></iframe>
+      </div>
+      <figcaption>
+        Source: <a href="https://www.waze.com/live-map?utm_campaign=iframe_search&utm_medium=web-iframe-desktop&utm_source=http%3A%2F%2F127.0.0.1%3A5000">Waze Live Map</a>
+      </figcaption>
+    </div>
+    
+    <footer class="text-center text-white" style="background-color: #f1f1f1;">
+      <!-- Copyright -->
+      <div class="text-center text-dark p-3" style="background-color: rgba(0, 0, 0, 0.2);">
+        <a class="text-dark" href="https://www.linkedin.com/in/ing-jorgecerdas/">Developed by: Jorge Cerdas</a>
+      </div>
+      <!-- Copyright -->
+    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='script.js') }}"></script>
+  </body>
+</html>
