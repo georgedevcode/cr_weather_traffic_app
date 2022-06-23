@@ -4,7 +4,15 @@ import aiohttp
 import json
 import requests
 from aioflask import Flask, render_template, make_response
-from markupsafe import escape
+from azure.identity import DefaultAzureCredential
+from azure.keyvault.secrets import SecretClient
+
+def GetOpenWeatherSecretKey():
+    credential = DefaultAzureCredential()
+    key_client = SecretClient(vault_url="https://crweatherappkeys.vault.azure.net/", credential=credential)
+    key = key_client.get_secret("openweatherkey")
+    print(f"Secret: {key.value}")
+    return key
 
 """
 --------------------------------------------
@@ -15,7 +23,7 @@ weather data
 weather_data = []
 curr_weather_conditions = []
 
-async def ExtractWeatherData(*locations):
+async def ExtractWeatherData(*locations, api_key):
     """
     Extracing the weather data based on the locations
     """
@@ -23,7 +31,7 @@ async def ExtractWeatherData(*locations):
     if len(locations) <= 7:
         async with aiohttp.ClientSession() as session:
             for location in locations:
-                async with session.get("http://api.openweathermap.org/data/2.5/weather?appid=041d712d7202058940ead494dd9f0e45&q={},CR&units=metric" .format(location)) as response:
+                async with session.get("http://api.openweathermap.org/data/2.5/weather?appid={api_key}&q={location},CR&units=metric" .format(api_key, location)) as response:
                     if response.status == 200:
                         app.logger.info(f"HTTP GET request: {response.status}")
                         data = await response.json()
@@ -62,7 +70,14 @@ app = Flask(__name__)
 
 @app.route("/")
 async def main_page():
-    if await ExtractWeatherData("Heredia", "San Jose", "Alajuela", "Cartago", "Guanacaste", "Limon", "Puntarenas"):
+
+    api_key = GetOpenWeatherSecretKey()
+    if api_key != None:
+        app.logger.debug("Sucess:Retrieved Open Weather API key from Azure Vault")
+    else:
+        InternalError(500)
+        
+    if await ExtractWeatherData("Heredia", "San Jose", "Alajuela", "Cartago", "Guanacaste", "Limon", "Puntarenas", api_key):
         app.logger.debug("Sucess:Retrieved weather data")
     else:
         app.logger.debug("Failed:Retrieved weather data")
