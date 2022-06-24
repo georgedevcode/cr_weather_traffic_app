@@ -1,4 +1,5 @@
 import re
+import os
 import asyncio
 import aiohttp
 import json
@@ -7,12 +8,13 @@ from aioflask import Flask, render_template, make_response
 from azure.identity import DefaultAzureCredential
 from azure.keyvault.secrets import SecretClient
 
+
 def GetOpenWeatherSecretKey():
     credential = DefaultAzureCredential()
     key_client = SecretClient(vault_url="https://crweatherappkeys.vault.azure.net/", credential=credential)
     key = key_client.get_secret("openweatherkey")
     print(f"Secret: {key.value}")
-    return key
+    return key.value
 
 """
 --------------------------------------------
