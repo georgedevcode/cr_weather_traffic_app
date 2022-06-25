@@ -1,19 +1,19 @@
-import re
 import os
-import asyncio
 import aiohttp
-import json
-import requests
 from aioflask import Flask, render_template, make_response
 from azure.identity import DefaultAzureCredential
 from azure.keyvault.secrets import SecretClient
 
+# vault_url = os.environ["VAULT_URL"]
+# vault_secret_name = os.environ["VAULT_SECRET_NAME"]
 
-def GetOpenWeatherSecretKey():
+vault_url = "https://crweatherappkeys.vault.azure.net/"
+vault_secret_name = "openweatherkey"
+
+async def GetOpenWeatherSecretKey():
     credential = DefaultAzureCredential()
-    key_client = SecretClient(vault_url="https://crweatherappkeys.vault.azure.net/", credential=credential)
-    key = key_client.get_secret("openweatherkey")
-    print(f"Secret: {key.value}")
+    key_client = SecretClient(vault_url=vault_url, credential=credential)
+    key = key_client.get_secret(vault_secret_name)
     return key.value
 
 """
@@ -33,7 +33,7 @@ async def ExtractWeatherData(*locations, api_key):
     if len(locations) <= 7:
         async with aiohttp.ClientSession() as session:
             for location in locations:
-                async with session.get("http://api.openweathermap.org/data/2.5/weather?appid={api_key}&q={location},CR&units=metric" .format(api_key, location)) as response:
+                async with session.get(f"http://api.openweathermap.org/data/2.5/weather?appid={api_key}&q={location},CR&units=metric" .format(api_key, location)) as response:
                     if response.status == 200:
                         app.logger.info(f"HTTP GET request: {response.status}")
                         data = await response.json()
@@ -73,13 +73,13 @@ app = Flask(__name__)
 @app.route("/")
 async def main_page():
 
-    api_key = GetOpenWeatherSecretKey()
+    api_key = await GetOpenWeatherSecretKey()
     if api_key != None:
         app.logger.debug("Sucess:Retrieved Open Weather API key from Azure Vault")
     else:
         InternalError(500)
         
-    if await ExtractWeatherData("Heredia", "San Jose", "Alajuela", "Cartago", "Guanacaste", "Limon", "Puntarenas", api_key):
+    if await ExtractWeatherData("Heredia", "San Jose", "Alajuela", "Cartago", "Guanacaste", "Limon", "Puntarenas", api_key=api_key):
         app.logger.debug("Sucess:Retrieved weather data")
     else:
         app.logger.debug("Failed:Retrieved weather data")
