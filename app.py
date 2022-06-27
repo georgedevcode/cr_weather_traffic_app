@@ -4,11 +4,8 @@ from aioflask import Flask, render_template, make_response
 from azure.identity import DefaultAzureCredential
 from azure.keyvault.secrets import SecretClient
 
-# vault_url = os.environ["VAULT_URL"]
-# vault_secret_name = os.environ["VAULT_SECRET_NAME"]
-
-vault_url = "https://crweatherappkeys.vault.azure.net/"
-vault_secret_name = "openweatherkey"
+vault_url = os.environ["VAULT_URL"]
+vault_secret_name = os.environ["VAULT_SECRET_NAME"]
 
 async def GetOpenWeatherSecretKey():
     credential = DefaultAzureCredential()
@@ -73,22 +70,26 @@ app = Flask(__name__)
 @app.route("/")
 async def main_page():
 
+    #First let's get the API keys to authenticate against the Open Weather API
     api_key = await GetOpenWeatherSecretKey()
     if api_key != None:
         app.logger.debug("Sucess:Retrieved Open Weather API key from Azure Vault")
     else:
-        InternalError(500)
-        
+        InternalError(500)  
+
+    #Once we got the API keys, let's call the API and extract the weather data
     if await ExtractWeatherData("Heredia", "San Jose", "Alajuela", "Cartago", "Guanacaste", "Limon", "Puntarenas", api_key=api_key):
         app.logger.debug("Sucess:Retrieved weather data")
     else:
         app.logger.debug("Failed:Retrieved weather data")
 
+    #Once the data has been extracted let's transform it to something for easier to manipulate
     if await TransformData(weather_data):
         app.logger.debug("Sucess: Transformed data")
     else:
         app.logger.debug("Failed: Transformed data")
 
+    #Right after the data has been transform, let's render the data on the web site using the HTML template
     render = await LoadDisplayTransformedData(curr_weather_conditions)
     if render:
         app.logger.debug("Sucess: Rendered data")
@@ -97,6 +98,7 @@ async def main_page():
 
     return render
 
+#My own implementation for the internal server error. 
 @app.errorhandler(500)
 async def InternalError(error):
     resp = make_response(await render_template("500_error.html", error=error))
